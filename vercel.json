@@ -1,0 +1,15 @@
+{
+  "buildCommand": "yarn build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "yarn install",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "regions": ["iad1"],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
