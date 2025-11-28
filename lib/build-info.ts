@@ -8,9 +8,9 @@
  */
 
 export const BUILD_INFO = {
-  version: '2025.11.28.5',
+  version: '2025.11.28.6',
   date: 'November 28, 2025',
-  description: 'Automatic build 2025.11.28.5'
+  description: 'Automatic build 2025.11.28.6'
 } as const;
 
 export function getBuildVersion(): string {

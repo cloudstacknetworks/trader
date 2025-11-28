@@ -71,3 +71,4 @@ monitor_download.sh
 # Abacus-specific yarn config (keep local only)
 .yarnrc.yml.abacus
 # Force Vercel refresh
+yarn.lock
