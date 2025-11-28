@@ -1,0 +1,41 @@
+# =====================================================
+# NETLIFY ENVIRONMENT VARIABLES
+# =====================================================
+# Copy and paste these into Netlify Dashboard:
+# Site Settings → Environment Variables → Add a variable
+# =====================================================
+
+# Database Configuration
+DATABASE_URL=postgresql://role_ea43962d4:Um49l3uWsSTjSBW1SnaYIITYncwAFx0G@db-ea43962d4.db003.hosteddb.reai.io:5432/ea43962d4?connect_timeout=15
+
+# NextAuth Configuration
+NEXTAUTH_SECRET=0ymwwtjVpYgpTH2pva2MupNsHilDrajN
+NEXTAUTH_URL=https://trader.cloudstacknetworks.com
+
+# Finnhub API (Market Data)
+FINNHUB_API_KEY=d4cte39r01qt1lago1e0d4cte39r01qt1lago1eg
+
+# Alpaca Trading API (Paper Trading)
+ALPACA_API_KEY=PKKESSVZW7MYDI4IHLGREVP6VG
+ALPACA_SECRET_KEY=dMPCc5ETJpyvYHgGVLzSfwh5erWKzN62j89eJsVz4Mg
+
+# Google OAuth SSO
+GOOGLE_CLIENT_ID=1082621233378-tg4uiubp0tofie65q46ihuqdgu2c6qk9.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
+# =====================================================
+# POST-DEPLOYMENT STEPS:
+# =====================================================
+# 1. After Netlify assigns your URL (e.g., https://trader-xyz.netlify.app)
+#    UPDATE the NEXTAUTH_URL variable above to your Netlify URL
+#
+# 2. Update Google OAuth Settings:
+#    - Go to: https://console.cloud.google.com/apis/credentials
+#    - Edit your OAuth 2.0 Client ID
+#    - Add to "Authorized JavaScript origins":
+#      https://your-netlify-url.netlify.app
+#    - Add to "Authorized redirect URIs":
+#      https://your-netlify-url.netlify.app/api/auth/callback/google
+#
+# 3. Trigger a new deployment in Netlify after updating NEXTAUTH_URL
+# =====================================================
