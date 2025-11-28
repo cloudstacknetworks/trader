@@ -1,0 +1,625 @@
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/oshaughnessy_trader/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Trading-specific fields
+  tradingAccount TradingAccount?
+  positions      Position[]
+  trades         Trade[]
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model TradingAccount {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  alpacaApiKey    String?  
+  alpacaSecretKey String?
+  isPaperTrading  Boolean  @default(true)
+  startingCapital Decimal  @default(1000.00) @db.Decimal(15, 2)
+  currentValue    Decimal  @default(1000.00) @db.Decimal(15, 2)
+  totalPnl        Decimal  @default(0.00) @db.Decimal(15, 2)
+  maxPositions    Int      @default(5)
+  trailingStopPct Decimal  @default(0.75) @db.Decimal(5, 2)
+  timeCutoffHour  Int      @default(16) // 4 PM ET
+  timeCutoffMin   Int      @default(0)
+  automationEnabled Boolean @default(true)
+  emailNotifications Boolean @default(true)
+  slackNotifications Boolean @default(false)
+  slackChannel    String?  // Slack channel for notifications (e.g., "#trading-alerts")
+  dailySummaryEmail Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("trading_accounts")
+}
+
+model Screen {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  description   String?
+  screenType    ScreenType @default(OSHAUGHNESSY) // Type of screen
+  
+  // Valuation Metrics
+  minPE         Decimal? @db.Decimal(8, 2)
+  maxPE         Decimal? @db.Decimal(8, 2)
+  minPS         Decimal? @db.Decimal(8, 2)
+  maxPS         Decimal? @db.Decimal(8, 2)
+  minPB         Decimal? @db.Decimal(8, 2)
+  maxPB         Decimal? @db.Decimal(8, 2)
+  minPCF        Decimal? @db.Decimal(8, 2)
+  maxPCF        Decimal? @db.Decimal(8, 2)
+  
+  // Financial Health
+  minROE        Decimal? @db.Decimal(8, 2)
+  maxROE        Decimal? @db.Decimal(8, 2)
+  minDebtToEquity Decimal? @db.Decimal(8, 2)
+  maxDebtToEquity Decimal? @db.Decimal(8, 2)
+  minCurrentRatio Decimal? @db.Decimal(8, 2)
+  maxCurrentRatio Decimal? @db.Decimal(8, 2)
+  
+  // Growth Metrics
+  minRevenueGrowth  Decimal? @db.Decimal(8, 2)
+  maxRevenueGrowth  Decimal? @db.Decimal(8, 2)
+  minEarningsGrowth Decimal? @db.Decimal(8, 2)
+  maxEarningsGrowth Decimal? @db.Decimal(8, 2)
+  
+  // Income Metrics
+  minDividendYield  Decimal? @db.Decimal(8, 2)
+  maxDividendYield  Decimal? @db.Decimal(8, 2)
+  
+  // Market Metrics
+  minMarketCap  Decimal? @db.Decimal(15, 2)
+  maxMarketCap  Decimal? @db.Decimal(15, 2)
+  minVolume     Decimal? @db.Decimal(15, 2)
+  maxVolume     Decimal? @db.Decimal(15, 2)
+  minMomentum   Decimal? @db.Decimal(8, 2)
+  maxMomentum   Decimal? @db.Decimal(8, 2)
+  
+  // Earnings-specific fields
+  minEarningsSurprise Decimal? @db.Decimal(8, 2) // Minimum earnings surprise % to trade
+  monitoredSymbols    String?  // JSON array of specific symbols to monitor for EARNINGS screens
+  
+  // Capital tracking fields
+  allocatedCapital    Decimal? @db.Decimal(15, 2) // Starting capital allocated to this strategy
+  currentCapital      Decimal? @db.Decimal(15, 2) // Current remaining capital for this strategy
+  dailyCapitalHistory String?  // JSON array of {date, capital, pnl} objects for daily tracking
+  
+  // Position sizing configuration
+  maxPositions        Int?     @default(10) // Max positions per day for this screen (5-15 range)
+  
+  // Legacy fields for backward compatibility
+  peRatioMax    Decimal? @db.Decimal(8, 2)
+  psRatioMax    Decimal? @db.Decimal(8, 2)
+  momentumMin   Decimal? @db.Decimal(8, 2)
+  marketCapMin  Decimal? @db.Decimal(15, 2)
+  
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  watchlistItems WatchlistItem[]
+  paperTradingRuns PaperTradingRun[]
+  
+  @@map("screens")
+}
+
+model WatchlistItem {
+  id           String    @id @default(cuid())
+  ticker       String
+  screenId     String
+  score        Decimal   @db.Decimal(8, 4)
+  peRatio      Decimal?  @db.Decimal(8, 2)
+  psRatio      Decimal?  @db.Decimal(8, 2)
+  momentum     Decimal?  @db.Decimal(8, 2)
+  marketCap    Decimal?  @db.Decimal(15, 2)
+  currentPrice Decimal?  @db.Decimal(10, 2)
+  earningsDate DateTime?
+  lastNewsCheck DateTime?
+  newsCount    Int       @default(0)
+  sentimentScore Decimal? @db.Decimal(4, 2)
+  dateAdded    DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  positions Position[]
+  trades    Trade[]
+  news      NewsItem[]
+  
+  @@unique([ticker, screenId])
+  @@map("watchlist_items")
+}
+
+model Position {
+  id              String    @id @default(cuid())
+  userId          String
+  ticker          String
+  watchlistItemId String?
+  quantity        Int
+  entryPrice      Decimal   @db.Decimal(10, 2)
+  currentPrice    Decimal?  @db.Decimal(10, 2)
+  unrealizedPnl   Decimal   @default(0.00) @db.Decimal(10, 2)
+  trailingStopPrice Decimal? @db.Decimal(10, 2)
+  alpacaOrderId   String?
+  entryTime       DateTime
+  status          PositionStatus @default(OPEN)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id])
+  watchlistItem WatchlistItem? @relation(fields: [watchlistItemId], references: [id])
+  
+  @@map("positions")
+}
+
+model Trade {
+  id              String    @id @default(cuid())
+  userId          String
+  ticker          String
+  watchlistItemId String?
+  paperTradingRunId String?
+  quantity        Int
+  entryPrice      Decimal   @db.Decimal(10, 2)
+  exitPrice       Decimal?  @db.Decimal(10, 2)
+  realizedPnl     Decimal   @default(0.00) @db.Decimal(10, 2)
+  entryTime       DateTime
+  exitTime        DateTime?
+  holdTimeMinutes Int?
+  exitReason      ExitReason?
+  alpacaEntryOrderId String?
+  alpacaExitOrderId  String?
+  strategy        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id])
+  watchlistItem WatchlistItem? @relation(fields: [watchlistItemId], references: [id])
+  paperTradingRun PaperTradingRun? @relation(fields: [paperTradingRunId], references: [id])
+  
+  @@map("trades")
+}
+
+model NewsItem {
+  id              String    @id @default(cuid())
+  ticker          String
+  watchlistItemId String?
+  headline        String
+  summary         String?
+  url             String?
+  source          String?
+  publishedAt     DateTime
+  sentimentScore  Decimal?  @db.Decimal(4, 2)
+  category        String?
+  relevanceScore  Decimal?  @db.Decimal(4, 2)
+  createdAt       DateTime  @default(now())
+  
+  watchlistItem WatchlistItem? @relation(fields: [watchlistItemId], references: [id])
+  
+  @@map("news_items")
+}
+
+model ScheduledJob {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  cronExpression String
+  isEnabled   Boolean  @default(true)
+  lastRun     DateTime?
+  nextRun     DateTime?
+  status      JobStatus @default(PENDING)
+  errorMessage String?
+  runCount    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("scheduled_jobs")
+}
+
+// Local Stock Data Cache - for instant screening
+model StockData {
+  symbol       String   @id
+  
+  // Company Info
+  companyName  String?
+  sector       String?
+  industry     String?
+  country      String?
+  exchange     String?
+  
+  // Price & Volume
+  currentPrice Decimal? @db.Decimal(10, 4)
+  previousClose Decimal? @db.Decimal(10, 4)
+  volume       BigInt?
+  avgVolume    BigInt?
+  marketCap    Decimal? @db.Decimal(18, 2)
+  
+  // Valuation Metrics
+  peRatio      Decimal? @db.Decimal(10, 4)
+  psRatio      Decimal? @db.Decimal(10, 4)
+  pbRatio      Decimal? @db.Decimal(10, 4)
+  pcfRatio     Decimal? @db.Decimal(10, 4)
+  evToEbitda   Decimal? @db.Decimal(10, 4)
+  
+  // Financial Health
+  roe          Decimal? @db.Decimal(10, 4)
+  roa          Decimal? @db.Decimal(10, 4)
+  debtToEquity Decimal? @db.Decimal(10, 4)
+  currentRatio Decimal? @db.Decimal(10, 4)
+  quickRatio   Decimal? @db.Decimal(10, 4)
+  
+  // Profitability
+  grossMargin  Decimal? @db.Decimal(10, 4)
+  operatingMargin Decimal? @db.Decimal(10, 4)
+  netMargin    Decimal? @db.Decimal(10, 4)
+  
+  // Growth Metrics
+  revenueGrowth   Decimal? @db.Decimal(10, 4)
+  earningsGrowth  Decimal? @db.Decimal(10, 4)
+  revenueGrowth3Y Decimal? @db.Decimal(10, 4)
+  earningsGrowth3Y Decimal? @db.Decimal(10, 4)
+  
+  // Income Metrics
+  dividendYield    Decimal? @db.Decimal(10, 4)
+  payoutRatio      Decimal? @db.Decimal(10, 4)
+  
+  // Momentum Metrics
+  momentum1M    Decimal? @db.Decimal(10, 4)
+  momentum3M    Decimal? @db.Decimal(10, 4)
+  momentum6M    Decimal? @db.Decimal(10, 4)
+  momentum12M   Decimal? @db.Decimal(10, 4)
+  
+  // Technical Indicators
+  beta         Decimal? @db.Decimal(10, 4)
+  fiftyDayMA   Decimal? @db.Decimal(10, 4)
+  twoHundredDayMA Decimal? @db.Decimal(10, 4)
+  volatility   Decimal? @db.Decimal(10, 4)
+  high52w      Decimal? @db.Decimal(10, 4)
+  low52w       Decimal? @db.Decimal(10, 4)
+  
+  // Additional Metrics
+  sharesOutstanding BigInt?
+  floatShares      BigInt?
+  insiderOwnership Decimal? @db.Decimal(10, 4)
+  institutionalOwnership Decimal? @db.Decimal(10, 4)
+  
+  // Data Quality & Freshness
+  lastUpdated  DateTime @default(now())
+  dataQuality  Int      @default(0) // 0-100 score based on how complete the data is
+  dataCompleteness DataCompleteness @default(MINIMAL) // What trading strategies this stock supports
+  hasError     Boolean  @default(false)
+  errorMessage String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relation to historical snapshots
+  snapshots StockDataSnapshot[]
+  
+  @@index([marketCap])
+  @@index([volume])
+  @@index([peRatio])
+  @@index([sector])
+  @@index([lastUpdated])
+  @@map("stock_data")
+}
+
+// Historical Stock Data Snapshots - for backtesting
+model StockDataSnapshot {
+  id           String   @id @default(cuid())
+  symbol       String
+  snapshotDate DateTime @default(now())
+  
+  // Store same data as StockData
+  currentPrice Decimal? @db.Decimal(10, 4)
+  volume       BigInt?
+  marketCap    Decimal? @db.Decimal(18, 2)
+  peRatio      Decimal? @db.Decimal(10, 4)
+  psRatio      Decimal? @db.Decimal(10, 4)
+  pbRatio      Decimal? @db.Decimal(10, 4)
+  pcfRatio     Decimal? @db.Decimal(10, 4)
+  roe          Decimal? @db.Decimal(10, 4)
+  debtToEquity Decimal? @db.Decimal(10, 4)
+  currentRatio Decimal? @db.Decimal(10, 4)
+  revenueGrowth Decimal? @db.Decimal(10, 4)
+  earningsGrowth Decimal? @db.Decimal(10, 4)
+  dividendYield Decimal? @db.Decimal(10, 4)
+  momentum1M   Decimal? @db.Decimal(10, 4)
+  momentum3M   Decimal? @db.Decimal(10, 4)
+  momentum6M   Decimal? @db.Decimal(10, 4)
+  
+  createdAt    DateTime @default(now())
+  
+  stockData StockData @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  
+  @@unique([symbol, snapshotDate])
+  @@index([symbol])
+  @@index([snapshotDate])
+  @@map("stock_data_snapshots")
+}
+
+// Data Refresh Log - track what was updated when
+model DataRefreshLog {
+  id           String   @id @default(cuid())
+  refreshType  RefreshType
+  startTime    DateTime @default(now())
+  endTime      DateTime?
+  status       JobStatus @default(RUNNING)
+  stocksProcessed Int   @default(0)
+  stocksUpdated   Int   @default(0)
+  stocksSkipped   Int   @default(0)
+  stocksFailed    Int   @default(0)
+  errorMessage    String?
+  
+  @@map("data_refresh_logs")
+}
+
+// Paper Trading Runs - track strategy experiments
+model PaperTradingRun {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  description     String?
+  
+  // Configuration
+  screenId        String?
+  runType         RunType  @default(HISTORICAL)
+  startDate       DateTime
+  endDate         DateTime?
+  startingCapital Decimal  @db.Decimal(15, 2)
+  maxPositions    Int      @default(5)
+  trailingStopPct Decimal  @db.Decimal(5, 2)
+  
+  // Status
+  status          RunStatus @default(RUNNING)
+  
+  // Results (calculated after completion)
+  finalCapital    Decimal?  @db.Decimal(15, 2)
+  totalReturn     Decimal?  @db.Decimal(10, 4) // Percentage
+  totalReturnDollars Decimal? @db.Decimal(15, 2)
+  totalTrades     Int       @default(0)
+  winningTrades   Int       @default(0)
+  losingTrades    Int       @default(0)
+  winRate         Decimal?  @db.Decimal(5, 2)
+  avgWinAmount    Decimal?  @db.Decimal(10, 2)
+  avgLossAmount   Decimal?  @db.Decimal(10, 2)
+  sharpeRatio     Decimal?  @db.Decimal(10, 4)
+  maxDrawdown     Decimal?  @db.Decimal(10, 4)
+  profitFactor    Decimal?  @db.Decimal(10, 4)
+  avgHoldTimeDays Decimal?  @db.Decimal(10, 2)
+  
+  // Notes/observations
+  notes           String?
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  completedAt     DateTime?
+  
+  // Relations
+  screen Screen? @relation(fields: [screenId], references: [id])
+  trades Trade[]
+  
+  @@map("paper_trading_runs")
+}
+
+enum RefreshType {
+  INITIAL_LOAD
+  FULL_REFRESH
+  DELTA_REFRESH
+  MANUAL_REFRESH
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  PENDING
+}
+
+enum ExitReason {
+  STOP_LOSS
+  NEGATIVE_NEWS
+  TIME_CUTOFF
+  MANUAL
+  PROFIT_TARGET
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum RunStatus {
+  RUNNING
+  COMPLETED
+  STOPPED
+  FAILED
+}
+
+enum RunType {
+  LIVE          // Real-time paper trading
+  HISTORICAL    // Backtest on historical data
+}
+
+enum ScreenType {
+  OSHAUGHNESSY  // Traditional O'Shaughnessy value/growth screening
+  EARNINGS      // Earnings-based day trading strategy
+}
+
+enum DataCompleteness {
+  FULL          // Complete fundamental data - suitable for all strategies including O'Shaughnessy
+  PARTIAL       // Has price, volume, market cap - suitable for earnings/news trading with some screening
+  BASIC         // Only basic info and price - suitable for pure earnings/news trading, minimal screening
+  MINIMAL       // Very limited data - use with caution, earnings/news only
+}
+
+// Earnings Calendar - Track earnings dates and estimates for all stocks
+model EarningsCalendar {
+  id              String   @id @default(cuid())
+  symbol          String
+  earningsDate    DateTime
+  fiscalQuarter   String   // Q1, Q2, Q3, Q4
+  fiscalYear      Int
+  estimatedEPS    Float?   // Analyst consensus estimate
+  actualEPS       Float?   // Actual reported EPS (null until reported)
+  beat            Boolean? // Did it beat expectations (calculated after report)
+  surprise        Float?   // Actual - Estimated (percentage)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([symbol, earningsDate])
+  @@index([earningsDate])
+  @@index([symbol])
+  @@map("earnings_calendar")
+}
+
+// Trade Notifications - Track all trade-related notifications
+model Notification {
+  id              String   @id @default(cuid())
+  userId          String
+  type            NotificationType
+  title           String
+  message         String
+  
+  // Trade details (when applicable)
+  ticker          String?
+  action          TradeAction?
+  quantity        Int?
+  price           Decimal? @db.Decimal(10, 2)
+  pnl             Decimal? @db.Decimal(10, 2)
+  
+  // Metadata
+  isRead          Boolean  @default(false)
+  emailSent       Boolean  @default(false)
+  slackSent       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  TRADE_BUY
+  TRADE_SELL
+  POSITION_OPENED
+  POSITION_CLOSED
+  DAILY_SUMMARY
+  SYSTEM_ALERT
+}
+
+enum TradeAction {
+  BUY
+  SELL
+}
+
+// Bug Tracking System Models
+model Bug {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  status      String   @default("open") // open, in_progress, resolved, closed
+  priority    String   @default("medium") // low, medium, high, critical
+  assignedTo  String?
+  reportedBy  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  activities  BugActivity[]
+
+  @@index([status])
+  @@index([priority])
+  @@map("bugs")
+}
+
+model BugActivity {
+  id        String   @id @default(cuid())
+  bugId     String
+  bug       Bug      @relation(fields: [bugId], references: [id], onDelete: Cascade)
+  action    String   // created, updated, status_changed, commented, assigned
+  field     String?  // field that was changed
+  oldValue  String?
+  newValue  String?
+  comment   String?  @db.Text
+  userId    String
+  userName  String
+  createdAt DateTime @default(now())
+
+  @@index([bugId])
+  @@map("bug_activities")
+}
+
+// Feature Notes System Models
+model FeatureNote {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  category    String   @default("feature") // feature, enhancement, bugfix, breaking
+  version     String
+  releaseDate DateTime
+  status      String   @default("planned") // planned, in_progress, released, deprecated
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([releaseDate])
+  @@map("feature_notes")
+}
