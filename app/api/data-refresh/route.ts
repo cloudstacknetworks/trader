@@ -21,7 +21,7 @@ export async function GET() {
     })
 
     // Check if there's a running refresh
-    const runningRefresh = logs.find(log => log.status === 'RUNNING')
+    const runningRefresh = logs.find((log: (typeof logs)[0]) => log.status === 'RUNNING')
 
     // Get stock data statistics - count all and those with complete data
     const totalStocksCount = await prisma.stockData.count()
