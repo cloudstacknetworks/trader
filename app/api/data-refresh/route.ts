@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { DataRefreshLog } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +22,7 @@ export async function GET() {
     })
 
     // Check if there's a running refresh
-    const runningRefresh = logs.find(log => log.status === 'RUNNING')
+    const runningRefresh = logs.find((log: DataRefreshLog) => log.status === 'RUNNING')
 
     // Get stock data statistics - count all and those with complete data
     const totalStocksCount = await prisma.stockData.count()
