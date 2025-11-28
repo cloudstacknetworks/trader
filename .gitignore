@@ -67,3 +67,6 @@ chunk*.log
 data-source-comparison.log
 watchdog.log
 monitor_download.sh
+
+# Abacus-specific yarn config (keep local only)
+.yarnrc.yml.abacus
