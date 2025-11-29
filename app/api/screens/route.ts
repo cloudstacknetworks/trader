@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       
       try {
         const result = await prisma.watchlistItem.createMany({
-          data: symbolsToAdd.map(ticker => ({
+          data: symbolsToAdd.map((ticker: string) => ({
             ticker,
             screenId: screen.id,
             score: 0,

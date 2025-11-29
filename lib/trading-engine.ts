@@ -418,7 +418,7 @@ export class TradingEngine {
     }
 
     // Get monitored symbols from watchlistItems (not from monitoredSymbols field)
-    const monitoredSymbols = screen.watchlistItems.map(item => item.ticker)
+    const monitoredSymbols = screen.watchlistItems.map((item: typeof screen.watchlistItems[0]) => item.ticker)
     
     if (monitoredSymbols.length === 0) {
       console.log(`⚠️  No watchlist items found for screen ${screen.name}`)
@@ -1205,7 +1205,7 @@ export class TradingEngine {
       if (positions.size < params.maxPositions && snapshots.length > 0) {
         // Filter for stocks with positive momentum and good scores (simulating news catalyst)
         const opportunities = snapshots
-          .filter(s => {
+          .filter((s: typeof snapshots[0]) => {
             // Must have positive 3M momentum (simulating positive news)
             const momentum = Number(s.momentum3M)
             return momentum > 5 && !positions.has(s.symbol)
@@ -1290,8 +1290,8 @@ export class TradingEngine {
     const avgHoldTime = totalTrades > 0 ? trades.reduce((sum, t) => sum + t.daysHeld, 0) / totalTrades : 0
 
     // Best and worst trades
-    const bestTrade = trades.length > 0 ? Math.max(...trades.map(t => t.pnlPct)) : 0
-    const worstTrade = trades.length > 0 ? Math.min(...trades.map(t => t.pnlPct)) : 0
+    const bestTrade = trades.length > 0 ? Math.max(...trades.map((t: typeof trades[0]) => t.pnlPct)) : 0
+    const worstTrade = trades.length > 0 ? Math.min(...trades.map((t: typeof trades[0]) => t.pnlPct)) : 0
 
     console.log(`Backtest complete: ${totalTrades} trades, ${totalReturnPct.toFixed(2)}% return`)
 
@@ -1535,7 +1535,7 @@ export class TradingEngine {
       if (positions.size < run.maxPositions && snapshots.length > 0) {
         // Filter for stocks with positive momentum and good scores (simulating news catalyst)
         const opportunities = snapshots
-          .filter(s => {
+          .filter((s: typeof snapshots[0]) => {
             // Must have positive 3M momentum (simulating positive news)
             const momentum = Number(s.momentum3M)
             return momentum > 5 && !positions.has(s.symbol)
@@ -1608,7 +1608,7 @@ export class TradingEngine {
     const avgHoldTimeDays = totalTrades > 0 ? trades.reduce((sum, t) => sum + (t.holdTimeMinutes / (60 * 24)), 0) / totalTrades : 0
 
     // Calculate Sharpe Ratio (simplified) - assuming risk-free rate of 0
-    const returns = trades.map(t => (t.pnl / run.startingCapital.toNumber()) * 100)
+    const returns = trades.map((t: typeof trades[0]) => (t.pnl / run.startingCapital.toNumber()) * 100)
     const avgReturn = returns.length > 0 ? returns.reduce((a, b) => a + b, 0) / returns.length : 0
     const stdDev = returns.length > 0 ? Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length) : 0
     const sharpeRatio = stdDev > 0 ? avgReturn / stdDev : 0

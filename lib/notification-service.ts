@@ -564,11 +564,11 @@ export class NotificationService {
     if (!this.sendGridApiKey) return
 
     // Group stocks by status
-    const reported = data.monitoredStocks.filter(s => s.actualEPS !== null)
-    const pending = data.monitoredStocks.filter(s => s.actualEPS === null)
+    const reported = data.monitoredStocks.filter((s: EarningsMonitorData) => s.actualEPS !== null)
+    const pending = data.monitoredStocks.filter((s: EarningsMonitorData) => s.actualEPS === null)
 
     // Generate stock rows HTML
-    const stockRowsHTML = data.monitoredStocks.map(stock => {
+    const stockRowsHTML = data.monitoredStocks.map((stock: EarningsMonitorData) => {
       let statusBadge = ''
       let statusColor = '#6b7280'
       

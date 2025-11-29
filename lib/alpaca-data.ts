@@ -220,8 +220,8 @@ export class AlpacaDataClient {
       const volatility = Math.sqrt(variance) * Math.sqrt(252) * 100 // Annualized volatility
 
       // 52-week high and low
-      const high52w = Math.max(...bars.map(b => b.h))
-      const low52w = Math.min(...bars.map(b => b.l))
+      const high52w = Math.max(...bars.map((b: AlpacaBar) => b.h))
+      const low52w = Math.min(...bars.map((b: AlpacaBar) => b.l))
 
       return { avgVolume, volatility, high52w, low52w }
     } catch (error) {
