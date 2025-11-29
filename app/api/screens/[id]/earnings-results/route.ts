@@ -119,7 +119,7 @@ export async function GET(
         minEarningsSurprise: Number(screen.minEarningsSurprise || 5),
         allocatedCapital: screen.allocatedCapital
       },
-      earningsResults: earnings.map(e => ({
+      earningsResults: earnings.map((e: typeof earnings[0]) => ({
         symbol: e.symbol,
         earningsDate: e.earningsDate.toISOString(),
         estimatedEPS: e.estimatedEPS,
@@ -128,7 +128,7 @@ export async function GET(
         surprise: e.surprise,
         qualifiedBeat: e.surprise !== null && e.surprise >= beatThreshold
       })),
-      trades: trades.filter(t => t.watchlistItem !== null).map(t => {
+      trades: trades.filter((t: typeof trades[0]) => t.watchlistItem !== null).map((t: typeof trades[0]) => {
         const entryPrice = Number(t.entryPrice);
         const exitPrice = t.exitPrice ? Number(t.exitPrice) : null;
         const pnlPercent = exitPrice ? ((exitPrice - entryPrice) / entryPrice) * 100 : null;
