@@ -213,7 +213,7 @@ async function main() {
       },
     })
     
-    const stocksToUpdate = allStocks.filter(s => 
+    const stocksToUpdate = allStocks.filter((s: typeof allStocks[0]) => 
       needsUpdate(s.lastUpdated) || s.hasError
     )
     

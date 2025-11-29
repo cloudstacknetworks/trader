@@ -55,12 +55,12 @@ async function sendDailySummaries() {
 
         // Calculate statistics
         const totalTrades = todaysTrades.length
-        const winningTrades = todaysTrades.filter(t => Number(t.realizedPnl) > 0).length
-        const losingTrades = todaysTrades.filter(t => Number(t.realizedPnl) < 0).length
-        const totalPnl = todaysTrades.reduce((sum, t) => sum + Number(t.realizedPnl), 0)
+        const winningTrades = todaysTrades.filter((t: typeof todaysTrades[0]) => Number(t.realizedPnl) > 0).length
+        const losingTrades = todaysTrades.filter((t: typeof todaysTrades[0]) => Number(t.realizedPnl) < 0).length
+        const totalPnl = todaysTrades.reduce((sum: number, t: typeof todaysTrades[0]) => sum + Number(t.realizedPnl), 0)
         
         // Find top and worst performers
-        const sortedTrades = [...todaysTrades].sort((a, b) => 
+        const sortedTrades = [...todaysTrades].sort((a: typeof todaysTrades[0], b: typeof todaysTrades[0]) => 
           Number(b.realizedPnl) - Number(a.realizedPnl)
         )
         const topPerformer = sortedTrades[0] ? {
