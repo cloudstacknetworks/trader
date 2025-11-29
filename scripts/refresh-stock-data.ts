@@ -152,7 +152,7 @@ async function createDailySnapshot() {
     const batch = stocks.slice(i, i + SNAPSHOT_BATCH_SIZE)
     
     await prisma.stockDataSnapshot.createMany({
-      data: batch.map(stock => ({
+      data: batch.map((stock: typeof stocks[0]) => ({
         symbol: stock.symbol,
         snapshotDate: today,
         currentPrice: stock.currentPrice,
@@ -248,7 +248,7 @@ async function main() {
       
       console.log(`📦 Batch ${batchNumber}/${totalBatches} (${batch.length} stocks)`)
       
-      const batchPromises = batch.map(s => refreshStock(s.symbol))
+      const batchPromises = batch.map((s: typeof stocksToUpdate[0]) => refreshStock(s.symbol))
       await Promise.all(batchPromises)
       
       stats.totalChecked += batch.length

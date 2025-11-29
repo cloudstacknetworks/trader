@@ -447,7 +447,7 @@ async function main() {
       select: { symbol: true }
     })
     
-    const existingSymbols = new Set(existingStocks.map(s => s.symbol))
+    const existingSymbols = new Set(existingStocks.map((s: typeof existingStocks[0]) => s.symbol))
     console.log(`   Found ${existingSymbols.size.toLocaleString()} stocks already downloaded`)
     
     // Filter to only NEW stocks that need downloading

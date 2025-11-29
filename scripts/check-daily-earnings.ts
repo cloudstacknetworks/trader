@@ -89,7 +89,7 @@ async function checkDailyEarnings() {
         where: { screenId: screen.id },
         select: { ticker: true }
       });
-      const monitoredTickers = watchlistItems.map(item => item.ticker);
+      const monitoredTickers = watchlistItems.map((item: typeof watchlistItems[0]) => item.ticker);
 
       // Get earnings data for monitored stocks (last 7 days window)
       const sevenDaysAgo = new Date();
@@ -123,8 +123,8 @@ async function checkDailyEarnings() {
             console.log(`    📧 Sending no-opportunities notification to ${user.user.email}`);
             
             // Build earnings monitor data
-            const monitoredStocksData = monitoredTickers.map(ticker => {
-              const earnings = earningsData.find(e => e.symbol === ticker);
+            const monitoredStocksData = monitoredTickers.map((ticker: string) => {
+              const earnings = earningsData.find((e: typeof earningsData[0]) => e.symbol === ticker);
               
               let passedScreen = false;
               let reason = 'No earnings reported in last 7 days';
