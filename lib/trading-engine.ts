@@ -202,7 +202,7 @@ export class TradingEngine {
       })
       
       // Sort by score and take top 50
-      scoredStocks.sort((a, b) => b.score - a.score)
+      scoredStocks.sort((a: typeof scoredStocks[0], b: typeof scoredStocks[0]) => b.score - a.score)
       const topStocks = scoredStocks.slice(0, 50)
       
       console.log(`Top stock: ${topStocks[0]?.ticker} (score: ${topStocks[0]?.score.toFixed(2)})`)
