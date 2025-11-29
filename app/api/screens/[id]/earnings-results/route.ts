@@ -81,14 +81,14 @@ export async function GET(
     })
 
     // Calculate summary statistics
-    const reported = earnings.filter(e => e.actualEPS !== null)
-    const beats = earnings.filter(e => e.beat === true)
+    const reported = earnings.filter((e: typeof earnings[0]) => e.actualEPS !== null)
+    const beats = earnings.filter((e: typeof earnings[0]) => e.beat === true)
     const beatThreshold = Number(screen.minEarningsSurprise || 5)
-    const qualifiedBeats = earnings.filter(e => 
+    const qualifiedBeats = earnings.filter((e: typeof earnings[0]) => 
       e.surprise !== null && e.surprise >= beatThreshold
     )
-    const misses = earnings.filter(e => e.beat === false)
-    const pending = earnings.filter(e => e.actualEPS === null)
+    const misses = earnings.filter((e: typeof earnings[0]) => e.beat === false)
+    const pending = earnings.filter((e: typeof earnings[0]) => e.actualEPS === null)
 
     // Check for executed trades
     const trades = await prisma.trade.findMany({
