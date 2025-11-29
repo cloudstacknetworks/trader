@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate price change for each stock
-    const stocksWithChange = stocks.map(stock => {
+    const stocksWithChange = stocks.map((stock: typeof stocks[0]) => {
       const currentPrice = stock.currentPrice ? Number(stock.currentPrice) : null
       const previousClose = stock.previousClose ? Number(stock.previousClose) : null
       
