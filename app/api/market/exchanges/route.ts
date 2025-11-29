@@ -32,7 +32,7 @@ export async function GET() {
 
     // Extract unique exchange names and filter out nulls
     const exchangeList = exchanges
-      .map(e => e.exchange)
+      .map((e: { exchange: string | null }) => e.exchange)
       .filter((e): e is string => e !== null)
 
     return NextResponse.json({ exchanges: exchangeList })
