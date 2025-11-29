@@ -40,7 +40,7 @@ export async function GET(
     const toDate = url.searchParams.get('to') || new Date().toISOString().split('T')[0]
 
     // Get all tickers from the screen
-    const tickers = screen.watchlistItems.map(w => w.ticker)
+    const tickers = screen.watchlistItems.map((w: typeof screen.watchlistItems[0]) => w.ticker)
 
     if (tickers.length === 0) {
       return NextResponse.json({
