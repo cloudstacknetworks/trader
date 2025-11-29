@@ -176,7 +176,7 @@ export class TradingEngine {
       console.log(`Query completed in ${queryTime}ms - found ${matchedStocks.length} stocks`)
       
       // Calculate composite O'Shaughnessy score for each stock
-      const scoredStocks = matchedStocks.map(stock => {
+      const scoredStocks = matchedStocks.map((stock: typeof matchedStocks[0]) => {
         const peRatio = stock.peRatio ? Number(stock.peRatio) : null
         const psRatio = stock.psRatio ? Number(stock.psRatio) : null
         const pbRatio = stock.pbRatio ? Number(stock.pbRatio) : null
