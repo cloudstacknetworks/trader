@@ -72,3 +72,14 @@ monitor_download.sh
 .yarnrc.yml.abacus
 # Force Vercel refresh
 yarn.lock
+
+# Netlify deployment files with secrets (configure in Netlify dashboard)
+.env.netlify
+NETLIFY_ENV_VARIABLES.txt
+
+# Test files with hardcoded credentials
+test-alpaca-connection.js
+
+
+
+
