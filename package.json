@@ -6,7 +6,8 @@
     "build": "tsx scripts/generate-build-number.ts && next build",
     "start": "next start",
     "lint": "next lint",
-    "prebuild": "tsx scripts/generate-build-number.ts"
+    "prebuild": "tsx scripts/generate-build-number.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
