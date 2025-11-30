@@ -29,6 +29,7 @@ declare module 'next-auth/jwt' {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  debug: true, // Enable debug mode for detailed error logging
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
