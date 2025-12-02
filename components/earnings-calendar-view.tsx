@@ -337,23 +337,36 @@ export default function EarningsCalendarView() {
       return
     }
     
+    console.log(`🔍 FRONTEND DEBUG - Creating screen with ${selectedSymbols.size} selected symbols`)
+    console.log(`   Selected symbols Set:`, selectedSymbols)
+    console.log(`   Selected symbols Array:`, Array.from(selectedSymbols))
+    
+    const symbolsArray = Array.from(selectedSymbols)
+    const symbolsJson = JSON.stringify(symbolsArray)
+    
+    console.log(`   Symbols JSON string (length ${symbolsJson.length}):`, symbolsJson.substring(0, 200))
+    
     setIsCreatingScreen(true)
     try {
+      const requestBody = {
+        name: screenName,
+        description: `Earnings strategy monitoring ${selectedSymbols.size} selected stocks - trades when they beat earnings by ${minEarningsSurprise}%+`,
+        screenType: 'EARNINGS',
+        isActive: true,
+        ...filters,
+        minEarningsSurprise,
+        allocatedCapital: allocatedCapital > 0 ? allocatedCapital : null,
+        currentCapital: allocatedCapital > 0 ? allocatedCapital : null,
+        maxPositions,
+        monitoredSymbols: symbolsJson
+      }
+      
+      console.log(`   Request body:`, { ...requestBody, monitoredSymbols: `[${symbolsArray.length} symbols]` })
+      
       const response = await fetch('/api/screens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: screenName,
-          description: `Earnings strategy monitoring ${selectedSymbols.size} selected stocks - trades when they beat earnings by ${minEarningsSurprise}%+`,
-          screenType: 'EARNINGS',
-          isActive: true,
-          ...filters,
-          minEarningsSurprise,
-          allocatedCapital: allocatedCapital > 0 ? allocatedCapital : null,
-          currentCapital: allocatedCapital > 0 ? allocatedCapital : null,
-          maxPositions,
-          monitoredSymbols: JSON.stringify(Array.from(selectedSymbols))
-        })
+        body: JSON.stringify(requestBody)
       })
       
       if (!response.ok) {

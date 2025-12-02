@@ -45,13 +45,27 @@ export async function POST(request: NextRequest) {
     const monitoredSymbolsStr = screenData.monitoredSymbols
     let symbolsToAdd: string[] = []
     
+    console.log(`🔍 DEBUG - monitoredSymbols received:`, {
+      type: typeof monitoredSymbolsStr,
+      value: monitoredSymbolsStr,
+      length: monitoredSymbolsStr?.length
+    })
+    
     if (monitoredSymbolsStr) {
       try {
         symbolsToAdd = JSON.parse(monitoredSymbolsStr)
-        console.log(`📋 Parsed ${symbolsToAdd.length} symbols to monitor`)
-      } catch (e) {
-        console.error('Failed to parse monitoredSymbols:', e)
+        console.log(`📋 Parsed ${symbolsToAdd.length} symbols to monitor:`, symbolsToAdd.slice(0, 5))
+        console.log(`   First 5 symbols:`, symbolsToAdd.slice(0, 5))
+        console.log(`   Is Array:`, Array.isArray(symbolsToAdd))
+      } catch (e: any) {
+        console.error('❌ CRITICAL: Failed to parse monitoredSymbols:', {
+          error: e.message,
+          stack: e.stack,
+          rawValue: monitoredSymbolsStr
+        })
       }
+    } else {
+      console.warn('⚠️  CRITICAL: monitoredSymbols is missing or empty in request!')
     }
     
     // Remove monitoredSymbols from screenData (not a Screen field)
@@ -110,37 +124,52 @@ export async function POST(request: NextRequest) {
     
     // Add watchlist items for monitored symbols
     if (symbolsToAdd.length > 0) {
-      console.log(`📝 Creating ${symbolsToAdd.length} watchlist items for screen ${screen.name}`)
-      console.log(`   Symbols to add: ${symbolsToAdd.join(', ')}`)
+      console.log(`📝 CREATING ${symbolsToAdd.length} WATCHLIST ITEMS for screen ${screen.name} (ID: ${screen.id})`)
+      console.log(`   All symbols:`, symbolsToAdd)
       
       try {
+        // Create the data array
+        const watchlistData = symbolsToAdd.map((ticker: string) => ({
+          ticker,
+          screenId: screen.id,
+          score: 0,
+          dateAdded: new Date()
+        }))
+        
+        console.log(`   Sample watchlist item data (first item):`, watchlistData[0])
+        
         const result = await prisma.watchlistItem.createMany({
-          data: symbolsToAdd.map((ticker: string) => ({
-            ticker,
-            screenId: screen.id,
-            score: 0,
-            dateAdded: new Date()
-          })),
+          data: watchlistData,
           skipDuplicates: true
         })
         
-        console.log(`✅ Successfully created ${result.count} watchlist items for screen ${screen.name}`)
+        console.log(`✅ SUCCESSFULLY CREATED ${result.count} watchlist items for screen ${screen.name}`)
         
         // Verify the items were created
         const verifyCount = await prisma.watchlistItem.count({
           where: { screenId: screen.id }
         })
-        console.log(`🔍 Verification: ${verifyCount} watchlist items found for screen ${screen.id}`)
+        console.log(`🔍 VERIFICATION: ${verifyCount} watchlist items found in database for screen ${screen.id}`)
+        
+        if (verifyCount === 0) {
+          console.error(`❌❌❌ CRITICAL BUG: Watchlist items were NOT saved to database despite no errors!`)
+          console.error(`   createMany returned count: ${result.count}`)
+          console.error(`   Actual count in DB: ${verifyCount}`)
+        }
         
       } catch (watchlistError: any) {
-        console.error(`❌ Failed to create watchlist items:`, watchlistError.message)
+        console.error(`❌❌❌ CRITICAL: Failed to create watchlist items:`)
+        console.error(`   Error message: ${watchlistError.message}`)
         console.error(`   Error code: ${watchlistError.code}`)
         console.error(`   Error meta:`, watchlistError.meta)
+        console.error(`   Full error:`, watchlistError)
         // Don't throw - we still want to return the screen even if watchlist creation fails
+        // But this is a CRITICAL bug that needs investigation
       }
     } else {
-      console.log(`⚠️  No symbols to add - symbolsToAdd array is empty!`)
-      console.log(`   Original monitoredSymbols string: "${monitoredSymbolsStr}"`)
+      console.error(`❌❌❌ CRITICAL: No symbols to add - symbolsToAdd array is EMPTY!`)
+      console.error(`   Original monitoredSymbols string: "${monitoredSymbolsStr}"`)
+      console.error(`   This means the frontend sent an empty array or parsing failed silently`)
     }
 
     return NextResponse.json(screen)
