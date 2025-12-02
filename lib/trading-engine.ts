@@ -29,12 +29,14 @@ export class TradingEngine {
     console.log('Starting O\'Shaughnessy screening (LOCAL DATA MODE)...')
 
     const screens = await prisma.screen.findMany({
-      where: specificScreenId ? { id: specificScreenId } : { isActive: true },
+      where: specificScreenId 
+        ? { id: specificScreenId, screenType: 'OSHAUGHNESSY' } 
+        : { isActive: true, screenType: 'OSHAUGHNESSY' },
     })
 
     if (screens.length === 0) {
-      console.log('No screens found to run')
-      return { message: 'No screens found', screensProcessed: 0, stocksFound: 0 }
+      console.log('No screens found to run (or screen is not an O\'Shaughnessy type)')
+      return { message: 'No O\'Shaughnessy screens found', screensProcessed: 0, stocksFound: 0 }
     }
 
     let totalStocksFound = 0

@@ -507,16 +507,18 @@ export default function ScreensView() {
                   <CardDescription>{screen.description}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRefreshScreen(screen.id, screen.name)}
-                    disabled={refreshingScreen === screen.id}
-                    className="gap-2"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${refreshingScreen === screen.id ? 'animate-spin' : ''}`} />
-                    {refreshingScreen === screen.id ? 'Refreshing...' : 'Refresh'}
-                  </Button>
+                  {screen.screenType === 'OSHAUGHNESSY' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRefreshScreen(screen.id, screen.name)}
+                      disabled={refreshingScreen === screen.id}
+                      className="gap-2"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${refreshingScreen === screen.id ? 'animate-spin' : ''}`} />
+                      {refreshingScreen === screen.id ? 'Refreshing...' : 'Refresh'}
+                    </Button>
+                  )}
                   {screen.screenType === 'EARNINGS' && (
                     <Button
                       variant="outline"
